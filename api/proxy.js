@@ -1,15 +1,16 @@
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "*");
   if (req.method === "OPTIONS") return res.status(200).end();
 
   const { path } = req.query;
-  const url = `https://api-football-v1.p.rapidapi.com/v3/${path || ""}`;
+  const url = `https://v3.football.api-sports.io/${path || ""}`;
 
   const response = await fetch(url, {
     headers: {
-      "x-rapidapi-key": "c80f9c9b92msh313d80456212fe7p1874b8jsn07db2ff9b67f",
-      "x-rapidapi-host": "api-football-v1.p.rapidapi.com"
+      "x-apisports-key": "44339918ac06c7a0cb2ccfe16e6c6706",
+      "x-apisports-host": "v3.football.api-sports.io"
     }
   });
 
