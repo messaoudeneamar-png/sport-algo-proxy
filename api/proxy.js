@@ -6,30 +6,28 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
-  const { type, date } = req.query;
+  const { type, date, league } = req.query;
 
   try {
-    const headers = {
-      'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
-      'Accept': '*/*',
-      'Referer': 'https://www.flashscore.com/',
-      'x-fsign': 'SW9D1eZo',
-    };
-
     let url;
-    if (type === 'live') {
-      url = 'https://d.flashscore.com/x/feed/live_1_en';
+    
+    if (type === 'day') {
+      const d = date || new Date().toISOString().split('T')[0];
+      url = `https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${d}&s=Soccer`;
+    } else if (type === 'league') {
+      url = `https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${league}`;
+    } else if (type === 'live') {
+      url = `https://www.thesportsdb.com/api/v1/json/3/eventslive.php?s=Soccer`;
     } else {
-      const d = date || new Date().toISOString().split('T')[0].replace(/-/g,'');
-      url = `https://d.flashscore.com/x/feed/f_1_${d}_1_en_1`;
+      return res.status(400).json({ error: 'Type requis: day, league ou live' });
     }
 
-    const response = await fetch(url, { headers });
-    const text = await response.text();
+    const response = await fetch(url);
+    const data = await response.json();
     
     return res.status(200).json({ 
       success: true, 
-      data: text.substring(0, 5000)
+      data: data
     });
 
   } catch (error) {
