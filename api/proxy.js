@@ -1,5 +1,3 @@
-const fetch = require('node-fetch');
-
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -8,47 +6,33 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
-  const { type, date, sport } = req.query;
+  const { type, date } = req.query;
 
   try {
-    // Flashscore API endpoints
     const headers = {
-      'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15',
-      'Accept': 'application/json, text/plain, */*',
+      'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
+      'Accept': '*/*',
       'Referer': 'https://www.flashscore.com/',
       'x-fsign': 'SW9D1eZo',
     };
 
-    if (type === 'scores') {
-      const targetDate = date || new Date().toISOString().split('T')[0];
-      const url = `https://d.flashscore.com/x/feed/f_1_${targetDate.replace(/-/g,'')}_1_en_1`;
-      
-      const response = await fetch(url, { headers });
-      const text = await response.text();
-      
-      return res.status(200).json({ 
-        success: true, 
-        data: text,
-        date: targetDate
-      });
-    }
-
+    let url;
     if (type === 'live') {
-      const url = `https://d.flashscore.com/x/feed/live_1_en`;
-      const response = await fetch(url, { headers });
-      const text = await response.text();
-      
-      return res.status(200).json({ 
-        success: true, 
-        data: text 
-      });
+      url = 'https://d.flashscore.com/x/feed/live_1_en';
+    } else {
+      const d = date || new Date().toISOString().split('T')[0].replace(/-/g,'');
+      url = `https://d.flashscore.com/x/feed/f_1_${d}_1_en_1`;
     }
 
-    return res.status(400).json({ error: 'Type requis: scores ou live' });
+    const response = await fetch(url, { headers });
+    const text = await response.text();
+    
+    return res.status(200).json({ 
+      success: true, 
+      data: text.substring(0, 5000)
+    });
 
   } catch (error) {
-    return res.status(500).json({ 
-      error: error.message 
-    });
+    return res.status(500).json({ error: error.message });
   }
 };
